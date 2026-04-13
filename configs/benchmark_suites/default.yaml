@@ -1,0 +1,9 @@
+# Default smoke-test suite — quick validation that the platform is working
+name: default_smoke
+model: gpt-4o-mini
+concurrency_levels: [1, 3]
+prompt_lengths: [100, 300]
+output_lengths: [100, 200]
+streaming: [false, true]
+runs_per_case: 3
+temperature: 0.0

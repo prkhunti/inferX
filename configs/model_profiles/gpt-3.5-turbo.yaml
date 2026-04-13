@@ -1,0 +1,21 @@
+name: gpt-3.5-turbo
+provider: openai
+model_id: gpt-3.5-turbo
+parameter_size: ~20B
+backend_type: openai
+max_context_tokens: 16385
+max_output_tokens: 4096
+quantization: null
+
+# Pricing (USD per 1 000 tokens, as of 2024-Q4)
+cost_per_1k_input_tokens: 0.000500
+cost_per_1k_output_tokens: 0.001500
+
+tags:
+  - legacy
+  - fast
+  - cheap
+
+notes: >
+  Legacy fast model. Useful as a historical baseline in
+  model-comparison experiments.

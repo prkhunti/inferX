@@ -1,0 +1,9 @@
+# Scenario 1: How does prompt length affect latency and throughput?
+name: prompt_length_sensitivity
+model: gpt-4o-mini
+concurrency_levels: [1]
+prompt_lengths: [100, 500, 2000]
+output_lengths: [150]
+streaming: [false]
+runs_per_case: 5
+temperature: 0.0

@@ -1,0 +1,12 @@
+# Scenario 4: Small fast model vs large capable model
+# Run the same load against two models to show quality-vs-cost-vs-speed tradeoff.
+# Execute this suite twice — once with model: gpt-4o-mini, once with model: gpt-4o —
+# then compare results side-by-side in the dashboard.
+name: model_comparison_mini
+model: gpt-4o-mini
+concurrency_levels: [1, 5, 10]
+prompt_lengths: [200]
+output_lengths: [150, 400]
+streaming: [false, true]
+runs_per_case: 10
+temperature: 0.0

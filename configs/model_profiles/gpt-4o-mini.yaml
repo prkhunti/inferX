@@ -1,0 +1,21 @@
+name: gpt-4o-mini
+provider: openai
+model_id: gpt-4o-mini
+parameter_size: ~8B
+backend_type: openai
+max_context_tokens: 128000
+max_output_tokens: 16384
+quantization: null
+
+# Pricing (USD per 1 000 tokens, as of 2024-Q4)
+cost_per_1k_input_tokens: 0.000150
+cost_per_1k_output_tokens: 0.000600
+
+tags:
+  - fast
+  - cheap
+  - small
+
+notes: >
+  Best cost-adjusted throughput for short-to-medium tasks.
+  Ideal baseline for latency and cost benchmarks.

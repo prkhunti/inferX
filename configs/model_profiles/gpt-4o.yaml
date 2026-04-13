@@ -1,0 +1,21 @@
+name: gpt-4o
+provider: openai
+model_id: gpt-4o
+parameter_size: ~200B
+backend_type: openai
+max_context_tokens: 128000
+max_output_tokens: 16384
+quantization: null
+
+# Pricing (USD per 1 000 tokens, as of 2024-Q4)
+cost_per_1k_input_tokens: 0.002500
+cost_per_1k_output_tokens: 0.010000
+
+tags:
+  - flagship
+  - high-quality
+  - expensive
+
+notes: >
+  Highest capability model. Use for model-comparison benchmarks to
+  demonstrate the quality-vs-cost tradeoff against gpt-4o-mini.

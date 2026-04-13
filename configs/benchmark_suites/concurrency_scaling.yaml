@@ -1,0 +1,9 @@
+# Scenario 2: How does throughput and tail latency change under increasing concurrency?
+name: concurrency_scaling
+model: gpt-4o-mini
+concurrency_levels: [1, 5, 10, 25, 50]
+prompt_lengths: [200]
+output_lengths: [150]
+streaming: [false]
+runs_per_case: 10
+temperature: 0.0

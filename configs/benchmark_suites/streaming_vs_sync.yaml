@@ -1,0 +1,9 @@
+# Scenario 3: Streaming vs synchronous — TTFT, total latency, perceived responsiveness
+name: streaming_vs_sync
+model: gpt-4o-mini
+concurrency_levels: [1, 5]
+prompt_lengths: [200]
+output_lengths: [200, 500]
+streaming: [false, true]
+runs_per_case: 10
+temperature: 0.0

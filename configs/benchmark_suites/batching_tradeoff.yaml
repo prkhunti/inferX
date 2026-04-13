@@ -1,0 +1,11 @@
+# Scenario 5: Batching tradeoff — throughput gain vs tail-latency cost
+# High concurrency simulates batched load; compare P95 latency vs RPS across levels.
+# Key insight to surface: batching improves throughput but inflates tail latency.
+name: batching_tradeoff
+model: gpt-4o-mini
+concurrency_levels: [1, 2, 4, 8, 16]
+prompt_lengths: [200]
+output_lengths: [200]
+streaming: [false]
+runs_per_case: 15
+temperature: 0.0

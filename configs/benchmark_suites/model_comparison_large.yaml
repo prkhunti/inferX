@@ -1,0 +1,10 @@
+# Scenario 4 (large model counterpart) — run alongside model_comparison.yaml
+# Compare results in the dashboard to visualize latency/throughput/cost tradeoffs.
+name: model_comparison_large
+model: gpt-4o
+concurrency_levels: [1, 5, 10]
+prompt_lengths: [200]
+output_lengths: [150, 400]
+streaming: [false, true]
+runs_per_case: 10
+temperature: 0.0
