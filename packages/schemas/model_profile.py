@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,8 @@ _PROFILES_DIR = Path("configs/model_profiles")
 
 
 class ModelProfile(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     name: str = Field(description="Canonical short name used in benchmark configs")
     provider: str = Field(description="API provider, e.g. openai, together, groq")
     model_id: str = Field(description="Exact model ID passed to the backend")

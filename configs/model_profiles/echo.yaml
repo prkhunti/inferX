@@ -1,0 +1,22 @@
+name: echo-model
+provider: local
+model_id: echo-model
+parameter_size: "N/A"
+backend_type: echo
+max_context_tokens: 131072
+max_output_tokens: 16384
+quantization: null
+
+cost_per_1k_input_tokens: 0.0
+cost_per_1k_output_tokens: 0.0
+
+tags:
+  - local
+  - no-api-key
+  - echo
+
+notes: >
+  Dummy echo backend for local development and CI.
+  Never calls an external API. Returns canned sentences with
+  simulated latency (~50 ms base + 10 ms/100 output tokens for generate,
+  5 ms/token for stream). Zero cost.

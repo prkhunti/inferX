@@ -6,6 +6,7 @@ import { generate, listModels } from "@/lib/api";
 import { useStream } from "@/hooks/useStream";
 import type { GenerateResponse, ModelProfile } from "@/lib/types";
 import { Card, StatCard } from "@/components/ui/Card";
+import { MarkdownText } from "@/components/ui/MarkdownText";
 import { clsx } from "clsx";
 import { Loader2, Square, Zap } from "lucide-react";
 
@@ -72,16 +73,17 @@ export default function PlaygroundPage() {
           <div className="flex items-center gap-2 text-xs text-zinc-500">
             <span>stream</span>
             <button
+              type="button"
               onClick={() => setUseStreamMode((v) => !v)}
               className={clsx(
-                "relative w-10 h-5 rounded-full transition-colors",
+                "inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
                 useStreamMode ? "bg-sky-600" : "bg-zinc-700",
               )}
             >
               <span
                 className={clsx(
-                  "absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform",
-                  useStreamMode ? "translate-x-5" : "translate-x-0.5",
+                  "pointer-events-none h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out",
+                  useStreamMode ? "translate-x-5" : "translate-x-0",
                 )}
               />
             </button>
@@ -146,12 +148,7 @@ export default function PlaygroundPage() {
             {activeError ? (
               <p className="text-sm text-red-400">{activeError}</p>
             ) : (
-              <p className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">
-                {activeText}
-                {isStreaming && (
-                  <span className="inline-block w-2 h-4 ml-0.5 bg-sky-400 animate-pulse align-middle" />
-                )}
-              </p>
+              <MarkdownText streaming={isStreaming}>{activeText}</MarkdownText>
             )}
           </Card>
         )}

@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from packages.schemas.model_profile import model_registry
 
@@ -12,6 +12,8 @@ router = APIRouter()
 
 
 class ModelProfileResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     name: str
     provider: str
     model_id: str

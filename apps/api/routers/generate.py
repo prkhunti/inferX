@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from openai import APIStatusError
 
 from apps.api.dependencies import get_backend, get_tracker
 from apps.api.metrics import (
@@ -50,6 +51,21 @@ async def generate(
             temperature=req.temperature,
             max_tokens=req.max_tokens,
         )
+    except APIStatusError as exc:
+        INFERENCE_REQUESTS.labels(endpoint="generate", model=req.model, status="error").inc()
+        logger.exception(
+            "generate.error",
+            extra={"request_id": lifecycle.request_id, "model": req.model, "status_code": exc.status_code},
+        )
+        metrics_service.record(RequestRecord(
+            request_id=lifecycle.request_id,
+            request_type="generate",
+            model=req.model,
+            requested_output_tokens=req.max_tokens,
+            status="error",
+            error_message=exc.message,
+        ))
+        raise HTTPException(status_code=502, detail=exc.message) from exc
     except Exception as exc:
         INFERENCE_REQUESTS.labels(endpoint="generate", model=req.model, status="error").inc()
         logger.exception(
@@ -64,7 +80,7 @@ async def generate(
             status="error",
             error_message=str(exc),
         ))
-        raise HTTPException(status_code=502, detail=f"Backend error: {exc}") from exc
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     lifecycle.mark_first_token()
     lifecycle.mark_complete()

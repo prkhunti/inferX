@@ -184,14 +184,6 @@ async def list_runs() -> list[RunSummary]:
     return [_to_summary(r) for r in benchmark_store.list_all()]
 
 
-@router.get("/{run_id}", response_model=RunSummary, summary="Get run status")
-async def get_run(run_id: str) -> RunSummary:
-    run = benchmark_store.get(run_id)
-    if not run:
-        raise HTTPException(status_code=404, detail=f"Run {run_id!r} not found")
-    return _to_summary(run)
-
-
 @router.get("/compare", response_model=CompareResponse, summary="Compare multiple completed runs")
 async def compare_runs(ids: str) -> CompareResponse:
     """
@@ -229,6 +221,14 @@ async def compare_runs(ids: str) -> CompareResponse:
         raise HTTPException(status_code=422, detail="No completed runs found among provided IDs.")
 
     return CompareResponse(runs=entries)
+
+
+@router.get("/{run_id}", response_model=RunSummary, summary="Get run status")
+async def get_run(run_id: str) -> RunSummary:
+    run = benchmark_store.get(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail=f"Run {run_id!r} not found")
+    return _to_summary(run)
 
 
 @router.get("/{run_id}/results", response_model=RunResultsResponse, summary="Get full results")

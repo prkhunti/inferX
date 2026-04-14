@@ -4,6 +4,7 @@ from typing import AsyncIterator
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
+from openai import APIStatusError
 
 from apps.api.dependencies import get_backend, get_tracker
 from apps.api.metrics import (
@@ -62,6 +63,22 @@ async def _token_stream(
 
             yield _sse({"token": chunk.token, "request_id": lifecycle.request_id})
 
+    except APIStatusError as exc:
+        INFERENCE_REQUESTS.labels(endpoint="stream", model=req.model, status="error").inc()
+        logger.exception(
+            "stream.error",
+            extra={"request_id": lifecycle.request_id, "model": req.model, "status_code": exc.status_code},
+        )
+        metrics_service.record(RequestRecord(
+            request_id=lifecycle.request_id,
+            request_type="stream",
+            model=req.model,
+            requested_output_tokens=req.max_tokens,
+            status="error",
+            error_message=exc.message,
+        ))
+        yield _sse({"error": exc.message, "request_id": lifecycle.request_id})
+        return
     except Exception as exc:
         INFERENCE_REQUESTS.labels(endpoint="stream", model=req.model, status="error").inc()
         logger.exception(
