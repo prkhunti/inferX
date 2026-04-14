@@ -1,5 +1,7 @@
 .PHONY: help up down build logs shell-api shell-db migrate test lint fmt
 
+COMPOSE = docker compose -f infra/docker-compose.yml
+
 # Default target
 help:
 	@echo ""
@@ -32,50 +34,50 @@ help:
 # ── Services ──────────────────────────────────────────────────────────────────
 
 up:
-	docker compose up -d
+	$(COMPOSE) up -d
 
 down:
-	docker compose down
+	$(COMPOSE) down
 
 build:
-	docker compose build --no-cache
+	$(COMPOSE) build --no-cache
 
 logs:
-	docker compose logs -f
+	$(COMPOSE) logs -f
 
 logs-api:
-	docker compose logs -f api
+	$(COMPOSE) logs -f api
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
 migrate:
-	docker compose exec api alembic upgrade head
+	$(COMPOSE) exec api alembic upgrade head
 
 db-reset:
-	docker compose exec postgres psql -U inferx -c "DROP DATABASE IF EXISTS inferx;"
-	docker compose exec postgres psql -U inferx -c "CREATE DATABASE inferx;"
+	$(COMPOSE) exec postgres psql -U inferx -c "DROP DATABASE IF EXISTS inferx;"
+	$(COMPOSE) exec postgres psql -U inferx -c "CREATE DATABASE inferx;"
 	$(MAKE) migrate
 
 # ── Shells ────────────────────────────────────────────────────────────────────
 
 shell-api:
-	docker compose exec api /bin/bash
+	$(COMPOSE) exec api /bin/bash
 
 shell-db:
-	docker compose exec postgres psql -U inferx -d inferx
+	$(COMPOSE) exec postgres psql -U inferx -d inferx
 
 # ── Quality ───────────────────────────────────────────────────────────────────
 
 test:
-	docker compose exec api pytest tests/ -v
+	$(COMPOSE) exec api pytest tests/ -v
 
 lint:
-	docker compose exec api ruff check apps/ packages/
+	$(COMPOSE) exec api ruff check apps/ packages/
 
 fmt:
-	docker compose exec api ruff format apps/ packages/
+	$(COMPOSE) exec api ruff format apps/ packages/
 
 # ── Benchmarks ────────────────────────────────────────────────────────────────
 
 bench:
-	docker compose exec api python -m packages.benchmarks.runner --suite configs/benchmark_suites/default.yaml
+	$(COMPOSE) exec api python -m packages.benchmarks.runner --suite configs/benchmark_suites/default.yaml

@@ -1,7 +1,7 @@
 services:
   api:
     build:
-      context: .
+      context: ..
       dockerfile: infra/docker/Dockerfile.api
     ports:
       - "8000:8000"
@@ -16,13 +16,13 @@ services:
       redis:
         condition: service_started
     volumes:
-      - ./apps/api:/app/apps/api
-      - ./packages:/app/packages
+      - ../apps/api:/app/apps/api
+      - ../packages:/app/packages
     restart: unless-stopped
 
   dashboard:
     build:
-      context: .
+      context: ..
       dockerfile: infra/docker/Dockerfile.dashboard
     ports:
       - "3000:3000"
@@ -62,7 +62,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./infra/docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../infra/docker/prometheus.yml:/etc/prometheus/prometheus.yml
     restart: unless-stopped
 
 volumes:
