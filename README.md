@@ -112,14 +112,15 @@ temperature: 0.0
 
 ## Local setup
 
-**Prerequisites:** Docker, Docker Compose, an OpenAI-compatible API key
+**Prerequisites:** Docker and Docker Compose. An API key is optional — the default `echo` backend runs locally with no credentials and simulated latency.
 
 ```bash
 # 1. Clone and configure
 git clone https://github.com/your-username/inferX.git
 cd inferX
 cp .env.example .env
-# Edit .env — set OPENAI_API_KEY (and optionally OPENAI_BASE_URL for vLLM/Groq/Together)
+# BACKEND_TYPE=echo is the default — works out of the box with no API key.
+# To use a real model: set BACKEND_TYPE=openai and OPENAI_API_KEY=sk-... in .env
 
 # 2. Build and start all services
 make build
@@ -145,6 +146,8 @@ open http://localhost:8000/docs
 **Useful commands**
 
 ```bash
+make up            # start all services
+make down          # stop all services
 make logs          # tail all service logs
 make logs-api      # tail API logs only
 make shell-api     # bash inside API container
@@ -154,6 +157,27 @@ make test          # run pytest
 make lint          # ruff check
 make fmt           # ruff format
 ```
+
+---
+
+## Development workflow
+
+Use `make dev-up` instead of `make up` to get hot-reload on both the API and the dashboard.
+
+```bash
+make dev-build     # build dev images (only needed once, or after dependency changes)
+make dev-up        # start all services with hot-reload
+make dev-logs      # tail logs
+make dev-down      # stop dev services
+```
+
+| What changes | How |
+|---|---|
+| **API** | `uvicorn --reload` — Python file saves restart the server automatically |
+| **Dashboard** | `next dev` with source volume-mounted — edits trigger HMR in the browser instantly |
+| **DB / Redis / Prometheus** | Same images as prod — no difference |
+
+> **First run only:** `make dev-build` builds the lightweight dev dashboard image (`Dockerfile.dashboard.dev`) which installs `node_modules` inside the container. Subsequent `make dev-up` calls reuse the image and the named `dashboard_node_modules` volume.
 
 ---
 
@@ -231,21 +255,30 @@ The API emits structured JSON logs and a Prometheus `/metrics` endpoint on every
 ```
 inferx/
 ├── apps/
-│   ├── api/                 # FastAPI app — routers, middleware, DB, metrics
-│   └── dashboard/           # Next.js 14 dashboard
+│   ├── api/                      # FastAPI app — routers, middleware, DB, metrics
+│   └── dashboard/                # Next.js 14 dashboard
 ├── packages/
-│   ├── serving/             # Backend abstraction + OpenAI implementation
-│   ├── scheduler/           # Request lifecycle timing
-│   ├── benchmarks/          # Suite definition, runner, aggregator
-│   ├── metrics/             # Async metrics persistence
-│   └── schemas/             # Shared Pydantic models, ModelRegistry
+│   ├── serving/                  # Backend abstraction + OpenAI / Echo implementations
+│   ├── scheduler/                # Request lifecycle timing
+│   ├── benchmarks/               # Suite definition, runner, aggregator
+│   ├── metrics/                  # Async metrics persistence
+│   └── schemas/                  # Shared Pydantic models, ModelRegistry
 ├── configs/
-│   ├── benchmark_suites/    # YAML experiment definitions
-│   └── model_profiles/      # Per-model cost and capability metadata
+│   ├── benchmark_suites/         # YAML experiment definitions
+│   └── model_profiles/           # Per-model cost and capability metadata
 ├── infra/
-│   └── docker/              # Dockerfiles, Prometheus config
-├── alembic/                 # DB migrations
+│   ├── docker/                   # Dockerfiles, Prometheus config
+│   │   ├── Dockerfile.api
+│   │   ├── Dockerfile.dashboard       # Production (standalone Next.js build)
+│   │   ├── Dockerfile.dashboard.dev   # Dev (npm run dev + volume mount)
+│   │   └── prometheus.yml
+│   ├── docker-compose.yml        # Production compose
+│   └── docker-compose.dev.yml    # Development overrides (hot-reload)
+├── .github/workflows/ci.yml      # CI — build + pytest in Docker
+├── alembic/                      # DB migrations
 └── tests/
+    ├── unit/                     # Pure logic tests (aggregator, suite, tracker)
+    └── integration/              # HTTP tests via ASGI transport
 ```
 
 ---

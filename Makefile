@@ -1,18 +1,26 @@
-.PHONY: help up down build logs shell-api shell-db migrate test lint fmt
+.PHONY: help up down build logs logs-api shell-api shell-db migrate db-reset test lint fmt bench \
+        dev-up dev-down dev-build dev-logs
 
-COMPOSE = docker compose -f infra/docker-compose.yml
+COMPOSE     = docker compose -f infra/docker-compose.yml
+COMPOSE_DEV = docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml
 
 # Default target
 help:
 	@echo ""
 	@echo "InferX — available commands:"
 	@echo ""
-	@echo "  Dev"
-	@echo "    make up           Start all services"
+	@echo "  Production"
+	@echo "    make up           Start all services (prod build)"
 	@echo "    make down         Stop all services"
-	@echo "    make build        Rebuild all Docker images"
+	@echo "    make build        Rebuild all Docker images (no cache)"
 	@echo "    make logs         Tail logs from all services"
 	@echo "    make logs-api     Tail API logs only"
+	@echo ""
+	@echo "  Development (hot-reload)"
+	@echo "    make dev-up       Start all services with hot-reload"
+	@echo "    make dev-down     Stop dev services"
+	@echo "    make dev-build    Rebuild dev images"
+	@echo "    make dev-logs     Tail dev service logs"
 	@echo ""
 	@echo "  Database"
 	@echo "    make migrate      Run DB migrations"
@@ -47,6 +55,20 @@ logs:
 
 logs-api:
 	$(COMPOSE) logs -f api
+
+# ── Dev (hot-reload) ──────────────────────────────────────────────────────────
+
+dev-up:
+	$(COMPOSE_DEV) up -d
+
+dev-down:
+	$(COMPOSE_DEV) down
+
+dev-build:
+	$(COMPOSE_DEV) build
+
+dev-logs:
+	$(COMPOSE_DEV) logs -f
 
 # ── Database ──────────────────────────────────────────────────────────────────
 

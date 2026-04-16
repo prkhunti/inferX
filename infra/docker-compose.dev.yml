@@ -1,0 +1,27 @@
+# Development overrides — extends docker-compose.yml with hot-reload for API and dashboard.
+#
+# Use via Makefile:   make dev-up / make dev-down / make dev-build
+# Or directly:        docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up -d
+#
+# What changes vs prod:
+#   api       — uvicorn --reload so Python changes are picked up without restart
+#   dashboard — Next.js dev server (npm run dev) with source volume-mounted for HMR
+
+services:
+  api:
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
+    # apps/api and packages are already volume-mounted in docker-compose.yml
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.dashboard.dev
+    volumes:
+      # Mount source for hot module replacement
+      - ../apps/dashboard:/app
+      # Preserve the container's node_modules — prevents the host mount from
+      # shadowing packages installed inside the image
+      - dashboard_node_modules:/app/node_modules
+
+volumes:
+  dashboard_node_modules:

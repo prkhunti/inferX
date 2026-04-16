@@ -1,0 +1,15 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies in a separate layer so they are cached independently
+# of source changes. The source tree is mounted as a volume at runtime.
+COPY apps/dashboard/package*.json ./
+RUN npm install
+
+EXPOSE 3000
+
+# Source code is volume-mounted over /app at runtime.
+# A named volume for node_modules prevents the host mount from shadowing
+# the container-installed packages.
+CMD ["npm", "run", "dev"]

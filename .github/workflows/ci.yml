@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker compose -f infra/docker-compose.yml build api
+
+      - name: Run tests
+        # Tests use SQLite in-memory (patched in conftest.py) so no postgres/redis needed.
+        # --no-deps skips starting dependency services.
+        # BACKEND_TYPE=echo is already the default; DATABASE_URL override is precautionary.
+        run: |
+          docker compose -f infra/docker-compose.yml run \
+            --no-deps --rm \
+            -e DATABASE_URL=sqlite+aiosqlite:///:memory: \
+            api pytest tests/ -v
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down --volumes
