@@ -9,10 +9,9 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context
-
 # Import all ORM models so Alembic can detect schema changes via autogenerate
 import apps.api.db_models  # noqa: F401
+from alembic import context
 from apps.api.database import Base
 
 config = context.config

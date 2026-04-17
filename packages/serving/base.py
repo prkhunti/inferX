@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import AsyncIterator, Optional
 
 
 @dataclass
@@ -18,8 +20,8 @@ class StreamChunk:
     For the final sentinel chunk: token is empty, usage fields are set.
     """
     token: str
-    prompt_tokens: Optional[int] = None
-    completion_tokens: Optional[int] = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
 
     @property
     def is_final(self) -> bool:
@@ -43,7 +45,7 @@ class BaseBackend(ABC):
         """Run a full (non-streaming) generation and return the complete response."""
 
     @abstractmethod
-    async def stream(
+    def stream(
         self,
         prompt: str,
         model: str,

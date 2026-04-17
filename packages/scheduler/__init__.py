@@ -1,3 +1,3 @@
-from .tracker import RequestTracker, RequestLifecycle
+from .tracker import RequestLifecycle, RequestTracker
 
 __all__ = ["RequestTracker", "RequestLifecycle"]

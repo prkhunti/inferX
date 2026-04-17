@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -9,15 +11,15 @@ from openai import APIStatusError
 from apps.api.dependencies import get_backend, get_tracker
 from apps.api.metrics import (
     INFERENCE_REQUESTS,
-    TTFT_HISTOGRAM,
-    TOTAL_LATENCY_HISTOGRAM,
-    TOKENS_PER_SEC_HISTOGRAM,
     OUTPUT_TOKENS_HISTOGRAM,
+    TOKENS_PER_SEC_HISTOGRAM,
+    TOTAL_LATENCY_HISTOGRAM,
+    TTFT_HISTOGRAM,
 )
 from packages.metrics.service import RequestRecord, metrics_service
+from packages.scheduler.tracker import RequestLifecycle, RequestTracker
 from packages.schemas.requests import GenerateRequest
 from packages.schemas.responses import UsageStats
-from packages.scheduler.tracker import RequestLifecycle, RequestTracker
 from packages.serving.openai_backend import OpenAIBackend
 
 logger = logging.getLogger(__name__)
@@ -67,7 +69,11 @@ async def _token_stream(
         INFERENCE_REQUESTS.labels(endpoint="stream", model=req.model, status="error").inc()
         logger.exception(
             "stream.error",
-            extra={"request_id": lifecycle.request_id, "model": req.model, "status_code": exc.status_code},
+            extra={
+                "request_id": lifecycle.request_id,
+                "model": req.model,
+                "status_code": exc.status_code,
+            },
         )
         metrics_service.record(RequestRecord(
             request_id=lifecycle.request_id,
@@ -107,7 +113,9 @@ async def _token_stream(
     # Prometheus
     INFERENCE_REQUESTS.labels(endpoint="stream", model=req.model, status="success").inc()
     TTFT_HISTOGRAM.labels(model=req.model).observe(latency.ttft_ms)
-    TOTAL_LATENCY_HISTOGRAM.labels(model=req.model, endpoint="stream").observe(latency.total_latency_ms)
+    TOTAL_LATENCY_HISTOGRAM.labels(model=req.model, endpoint="stream").observe(
+        latency.total_latency_ms
+    )
     TOKENS_PER_SEC_HISTOGRAM.labels(model=req.model).observe(latency.tokens_per_sec)
     OUTPUT_TOKENS_HISTOGRAM.labels(model=req.model).observe(completion_tokens)
 

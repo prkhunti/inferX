@@ -1,13 +1,13 @@
 """Unit tests for packages/benchmarks/suite.py."""
 
 import pytest
+
 from packages.benchmarks.suite import (
     BenchmarkCase,
     BenchmarkSuiteConfig,
     expand_suite,
     synthetic_prompt,
 )
-
 
 # ── synthetic_prompt ──────────────────────────────────────────────────────────
 
@@ -164,11 +164,13 @@ class TestBenchmarkSuiteConfig:
 
     def test_runs_per_case_min(self):
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             BenchmarkSuiteConfig(name="x", model="m", runs_per_case=0)
 
     def test_temperature_bounds(self):
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             BenchmarkSuiteConfig(name="x", model="m", temperature=3.0)
         with pytest.raises(ValidationError):

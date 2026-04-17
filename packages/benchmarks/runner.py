@@ -18,12 +18,16 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from packages.benchmarks.aggregator import CaseStats, RequestResult, aggregate
-from packages.benchmarks.suite import BenchmarkCase, BenchmarkSuiteConfig, expand_suite, synthetic_prompt
+from packages.benchmarks.suite import (
+    BenchmarkCase,
+    BenchmarkSuiteConfig,
+    expand_suite,
+    synthetic_prompt,
+)
 from packages.serving.base import BaseBackend
 
 logger = logging.getLogger(__name__)
@@ -36,10 +40,10 @@ class BenchmarkRun:
     id: str = field(default_factory=lambda: str(uuid4()))
     suite_name: str = ""
     status: str = "pending"          # pending | running | completed | failed
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     case_stats: list[CaseStats] = field(default_factory=list)
-    error: Optional[str] = None
+    error: str | None = None
 
     def total_cases(self) -> int:
         return len(self.case_stats)
@@ -56,7 +60,7 @@ async def _run_single(
 
     async with semaphore:
         start = time.perf_counter()
-        ttft_mark: Optional[float] = None
+        ttft_mark: float | None = None
 
         try:
             if case.streaming:
@@ -179,7 +183,7 @@ async def run_suite(
     Concurrency within each case is controlled by BenchmarkCase.concurrency.
     """
     run.status = "running"
-    run.started_at = datetime.now(timezone.utc)
+    run.started_at = datetime.now(UTC)
     cases = expand_suite(cfg)
 
     logger.info(
@@ -194,7 +198,7 @@ async def run_suite(
             run.case_stats.append(stats)
 
         run.status = "completed"
-        run.completed_at = datetime.now(timezone.utc)
+        run.completed_at = datetime.now(UTC)
         logger.info(
             "benchmark.suite_done suite=%s cases=%d",
             cfg.name,
@@ -203,6 +207,6 @@ async def run_suite(
 
     except Exception as exc:
         run.status = "failed"
-        run.completed_at = datetime.now(timezone.utc)
+        run.completed_at = datetime.now(UTC)
         run.error = str(exc)
         logger.exception("benchmark.suite_failed suite=%s", cfg.name)

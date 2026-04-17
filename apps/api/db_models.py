@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -11,7 +11,7 @@ from apps.api.database import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Request(Base):
@@ -29,7 +29,7 @@ class Request(Base):
         server_default=func.now(),
     )
 
-    metric: Mapped["RequestMetric | None"] = relationship(
+    metric: Mapped[RequestMetric | None] = relationship(
         "RequestMetric", back_populates="request", uselist=False, cascade="all, delete-orphan"
     )
 
@@ -56,4 +56,4 @@ class RequestMetric(Base):
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_message: Mapped[str | None] = mapped_column(String(512))
 
-    request: Mapped["Request"] = relationship("Request", back_populates="metric")
+    request: Mapped[Request] = relationship("Request", back_populates="metric")

@@ -1,7 +1,5 @@
 """Integration tests for system endpoints."""
 
-import pytest
-
 
 async def test_health(client):
     response = await client.get("/health")

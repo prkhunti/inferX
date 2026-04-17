@@ -1,105 +1,86 @@
-.PHONY: help up down build logs logs-api shell-api shell-db migrate db-reset test lint fmt bench \
-        dev-up dev-down dev-build dev-logs
+.PHONY: help up down build logs logs-api shell-api shell-db migrate db-reset test test-unit \
+        test-integration test-eval lint format typecheck bench dev-up dev-down dev-build dev-logs
 
-COMPOSE     = docker compose -f infra/docker-compose.yml
-COMPOSE_DEV = docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml
+COMPOSE     = docker compose -f infra/docker-compose.yaml
+COMPOSE_DEV = docker compose -f infra/docker-compose.yaml -f infra/docker-compose.dev.yaml
 
-# Default target
-help:
-	@echo ""
-	@echo "InferX — available commands:"
-	@echo ""
-	@echo "  Production"
-	@echo "    make up           Start all services (prod build)"
-	@echo "    make down         Stop all services"
-	@echo "    make build        Rebuild all Docker images (no cache)"
-	@echo "    make logs         Tail logs from all services"
-	@echo "    make logs-api     Tail API logs only"
-	@echo ""
-	@echo "  Development (hot-reload)"
-	@echo "    make dev-up       Start all services with hot-reload"
-	@echo "    make dev-down     Stop dev services"
-	@echo "    make dev-build    Rebuild dev images"
-	@echo "    make dev-logs     Tail dev service logs"
-	@echo ""
-	@echo "  Database"
-	@echo "    make migrate      Run DB migrations"
-	@echo "    make db-reset     Drop and recreate the database"
-	@echo ""
-	@echo "  Dev shells"
-	@echo "    make shell-api    Open shell inside API container"
-	@echo "    make shell-db     Open psql inside postgres container"
-	@echo ""
-	@echo "  Quality"
-	@echo "    make test         Run all tests"
-	@echo "    make lint         Run linters (ruff)"
-	@echo "    make fmt          Format code (ruff format)"
-	@echo ""
-	@echo "  Benchmarks"
-	@echo "    make bench        Run default benchmark suite"
-	@echo ""
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-26s\033[0m %s\n", $$1, $$2}' | sort
 
 # ── Services ──────────────────────────────────────────────────────────────────
 
-up:
+up: ## Start all services
 	$(COMPOSE) up -d
 
-down:
+down: ## Stop all services
 	$(COMPOSE) down
 
-build:
+build: ## Rebuild all Docker images without cache
 	$(COMPOSE) build --no-cache
 
-logs:
+logs: ## Tail logs from all services
 	$(COMPOSE) logs -f
 
-logs-api:
+logs-api: ## Tail API logs only
 	$(COMPOSE) logs -f api
 
 # ── Dev (hot-reload) ──────────────────────────────────────────────────────────
 
-dev-up:
+dev-up: ## Start all services with hot reload
 	$(COMPOSE_DEV) up -d
 
-dev-down:
+dev-down: ## Stop development services
 	$(COMPOSE_DEV) down
 
-dev-build:
+dev-build: ## Build development images
 	$(COMPOSE_DEV) build
 
-dev-logs:
+dev-logs: ## Tail development service logs
 	$(COMPOSE_DEV) logs -f
 
 # ── Database ──────────────────────────────────────────────────────────────────
 
-migrate:
+migrate: ## Run database migrations
 	$(COMPOSE) exec api alembic upgrade head
 
-db-reset:
+db-reset: ## Drop and recreate the database
 	$(COMPOSE) exec postgres psql -U inferx -c "DROP DATABASE IF EXISTS inferx;"
 	$(COMPOSE) exec postgres psql -U inferx -c "CREATE DATABASE inferx;"
 	$(MAKE) migrate
 
 # ── Shells ────────────────────────────────────────────────────────────────────
 
-shell-api:
+shell-api: ## Open a shell in the API container
 	$(COMPOSE) exec api /bin/bash
 
-shell-db:
+shell-db: ## Open psql in the Postgres container
 	$(COMPOSE) exec postgres psql -U inferx -d inferx
 
 # ── Quality ───────────────────────────────────────────────────────────────────
 
-test:
+test: ## Run the full test suite
 	$(COMPOSE) exec api pytest tests/ -v
 
-lint:
+test-unit: ## Run unit tests
+	$(COMPOSE) exec api pytest tests/unit -v
+
+test-integration: ## Run integration tests
+	$(COMPOSE) exec api pytest tests/integration -v
+
+test-eval: ## Run evaluation tests
+	$(COMPOSE) exec api pytest tests/eval -v
+
+lint: ## Run Ruff lint checks
 	$(COMPOSE) exec api ruff check apps/ packages/
 
-fmt:
+format: ## Format Python code with Ruff
 	$(COMPOSE) exec api ruff format apps/ packages/
+
+typecheck: ## Run mypy
+	$(COMPOSE) exec api mypy apps packages tests
 
 # ── Benchmarks ────────────────────────────────────────────────────────────────
 
-bench:
+bench: ## Run the default benchmark suite
 	$(COMPOSE) exec api python -m packages.benchmarks.runner --suite configs/benchmark_suites/default.yaml

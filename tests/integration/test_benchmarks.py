@@ -1,18 +1,16 @@
 """Integration tests for /benchmarks endpoints."""
 
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from packages.benchmarks.runner import BenchmarkRun
 from packages.benchmarks.aggregator import CaseStats
-
+from packages.benchmarks.runner import BenchmarkRun
 
 # ── helpers ────────────────────────────────────────────────────────────────────
 
 def make_completed_run(run_id: str, suite_name: str = "test_suite") -> BenchmarkRun:
     run = BenchmarkRun(id=run_id, suite_name=suite_name, status="completed")
-    run.started_at = datetime.now(timezone.utc)
-    run.completed_at = datetime.now(timezone.utc)
+    run.started_at = datetime.now(UTC)
+    run.completed_at = datetime.now(UTC)
     run.case_stats = [
         CaseStats(
             case_name=f"{suite_name}__c1__p100__o50__sync",

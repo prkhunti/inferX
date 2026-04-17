@@ -1,7 +1,8 @@
 """Integration tests for GET /models."""
 
 import pytest
-from packages.schemas.model_profile import ModelProfile, ModelRegistry
+
+from packages.schemas.model_profile import ModelProfile
 
 
 async def test_models_returns_list(client):

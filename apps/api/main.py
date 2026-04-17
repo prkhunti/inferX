@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -14,7 +17,6 @@ from packages.schemas.model_profile import model_registry
 settings = get_settings()
 configure_logging(debug=settings.debug)
 
-import logging  # noqa: E402 — must come after configure_logging
 logger = logging.getLogger(__name__)
 
 

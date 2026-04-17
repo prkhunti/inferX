@@ -1,11 +1,8 @@
 """Integration tests for POST /stream (SSE)."""
 
 import json
-import pytest
-from unittest.mock import AsyncMock
-from openai import RateLimitError
 
-from packages.serving.base import StreamChunk
+from openai import RateLimitError
 
 
 def parse_sse(response_text: str) -> list[dict]:
@@ -154,7 +151,9 @@ async def test_stream_error_event_on_backend_failure(client_with_backend):
 
 def _make_mock_response(status_code: int):
     from unittest.mock import MagicMock
+
     import httpx
+
     resp = MagicMock(spec=httpx.Response)
     resp.status_code = status_code
     resp.headers = httpx.Headers({})

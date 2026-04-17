@@ -1,7 +1,7 @@
 """Unit tests for packages/scheduler/tracker.py."""
 
 import time
-import pytest
+
 from packages.scheduler.tracker import RequestLifecycle, RequestTracker
 
 

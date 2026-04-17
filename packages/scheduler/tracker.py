@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Optional
 
 from packages.schemas.responses import LatencyStats
 
 
 @dataclass
 class RequestLifecycle:
+    """Track the lifecycle timestamps for a single request."""
+
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     enqueue_time: float = field(default_factory=time.perf_counter)
-    start_time: Optional[float] = None
-    first_token_time: Optional[float] = None
-    completion_time: Optional[float] = None
+    start_time: float | None = None
+    first_token_time: float | None = None
+    completion_time: float | None = None
 
     def mark_start(self) -> None:
         self.start_time = time.perf_counter()
@@ -24,6 +27,7 @@ class RequestLifecycle:
         self.completion_time = time.perf_counter()
 
     def to_latency_stats(self, completion_tokens: int) -> LatencyStats:
+        """Convert the captured lifecycle timestamps into latency statistics."""
         now = time.perf_counter()
         start = self.start_time or now
         first_token = self.first_token_time or now

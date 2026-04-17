@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from itertools import product
 from pathlib import Path
-from typing import Iterator
 
 import yaml
 from pydantic import BaseModel, Field
@@ -23,7 +22,7 @@ class BenchmarkSuiteConfig(BaseModel):
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> "BenchmarkSuiteConfig":
+    def from_yaml(cls, path: str | Path) -> BenchmarkSuiteConfig:
         with open(path) as f:
             return cls(**yaml.safe_load(f))
 

@@ -102,7 +102,7 @@ temperature: 0.0
 
 ## Tech stack
 
-**Backend** — Python 3.11, FastAPI, Pydantic v2, SQLAlchemy async (asyncpg), Alembic, Prometheus
+**Backend** — Python 3.12, FastAPI, Pydantic v2, SQLAlchemy async (asyncpg), Alembic, Prometheus
 
 **Frontend** — Next.js 14 App Router, TypeScript, Tailwind CSS, Recharts
 
@@ -155,7 +155,8 @@ make shell-db      # psql inside postgres container
 make migrate       # run pending Alembic migrations
 make test          # run pytest
 make lint          # ruff check
-make fmt           # ruff format
+make format        # ruff format
+make typecheck     # mypy
 ```
 
 ---
@@ -272,8 +273,8 @@ inferx/
 │   │   ├── Dockerfile.dashboard       # Production (standalone Next.js build)
 │   │   ├── Dockerfile.dashboard.dev   # Dev (npm run dev + volume mount)
 │   │   └── prometheus.yml
-│   ├── docker-compose.yml        # Production compose
-│   └── docker-compose.dev.yml    # Development overrides (hot-reload)
+│   ├── docker-compose.yaml       # Production compose
+│   └── docker-compose.dev.yaml   # Development overrides (hot-reload)
 ├── .github/workflows/ci.yml      # CI — build + pytest in Docker
 ├── alembic/                      # DB migrations
 └── tests/

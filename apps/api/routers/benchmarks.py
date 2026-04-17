@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -20,11 +21,11 @@ router = APIRouter()
 class RunRequest(BaseModel):
     """Inline suite definition or path to a YAML config file."""
 
-    suite: Optional[BenchmarkSuiteConfig] = Field(
+    suite: BenchmarkSuiteConfig | None = Field(
         default=None,
         description="Inline suite definition",
     )
-    suite_file: Optional[str] = Field(
+    suite_file: str | None = Field(
         default=None,
         description="Path to a YAML suite file inside configs/benchmark_suites/",
     )
@@ -46,10 +47,10 @@ class RunSummary(BaseModel):
     id: str
     suite_name: str
     status: str
-    started_at: Optional[str]
-    completed_at: Optional[str]
+    started_at: str | None
+    completed_at: str | None
     total_cases: int
-    error: Optional[str]
+    error: str | None
 
 
 class CaseStatsResponse(BaseModel):
@@ -90,8 +91,8 @@ class RunResultsResponse(BaseModel):
     id: str
     suite_name: str
     status: str
-    started_at: Optional[str]
-    completed_at: Optional[str]
+    started_at: str | None
+    completed_at: str | None
     cases: list[CaseStatsResponse]
 
 
@@ -100,7 +101,7 @@ class CompareRunEntry(BaseModel):
     id: str
     suite_name: str
     model: str                     # primary model across cases (first case's model)
-    started_at: Optional[str]
+    started_at: str | None
     cases: list[CaseStatsResponse]
 
 
@@ -158,11 +159,7 @@ async def start_run(
     background_tasks: BackgroundTasks,
     backend: OpenAIBackend = Depends(get_backend),
 ) -> RunSummary:
-    """
-    Launch a benchmark suite as a background task and return immediately
-    with the run ID. Poll `GET /benchmarks/{id}` to track status, then
-    fetch `GET /benchmarks/{id}/results` when status is `completed`.
-    """
+    """Launch a benchmark suite in the background and return the run summary."""
     cfg = _load_suite(req)
 
     run = BenchmarkRun(suite_name=cfg.name, status="pending")
@@ -186,15 +183,7 @@ async def list_runs() -> list[RunSummary]:
 
 @router.get("/compare", response_model=CompareResponse, summary="Compare multiple completed runs")
 async def compare_runs(ids: str) -> CompareResponse:
-    """
-    Fetch and align results from two or more completed runs for side-by-side comparison.
-
-    Pass a comma-separated list of run IDs: `?ids=id1,id2,id3`
-
-    Only completed runs are included; pending/running/failed runs are skipped
-    with a warning rather than returning an error, so a partial comparison is
-    still usable.
-    """
+    """Fetch and align completed runs for side-by-side comparison."""
     run_ids = [r.strip() for r in ids.split(",") if r.strip()]
     if len(run_ids) < 2:
         raise HTTPException(status_code=422, detail="Provide at least two run IDs.")

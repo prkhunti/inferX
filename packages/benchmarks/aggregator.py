@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import statistics
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 from packages.schemas.model_profile import model_registry
 
@@ -19,7 +18,7 @@ class RequestResult:
     tokens_per_sec: float = 0.0
     prompt_tokens: int = 0
     completion_tokens: int = 0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -66,6 +65,7 @@ class CaseStats:
 
 
 def _percentile(data: list[float], p: float) -> float:
+    """Return the interpolated percentile value for a numeric series."""
     if not data:
         return 0.0
     sorted_data = sorted(data)
@@ -79,9 +79,19 @@ def _estimate_costs(
     model: str,
     results: list[RequestResult],
 ) -> tuple[float, float, float]:
-    """Return (avg_cost_per_request, total_cost, cost_per_1k_output).
+    """Estimate aggregate benchmark costs.
 
-    Falls back to zero if the model is not in the registry.
+    Parameters
+    ----------
+    model : str
+        Registry key used to look up pricing metadata.
+    results : list[RequestResult]
+        Per-request benchmark results for a single case.
+
+    Returns
+    -------
+    tuple[float, float, float]
+        Average cost per request, total cost, and cost per 1k output tokens.
     """
     profile = model_registry.get(model)
     if not profile:
@@ -116,6 +126,32 @@ def aggregate(
     results: list[RequestResult],
     wall_time_sec: float,
 ) -> CaseStats:
+    """Aggregate raw request results into case-level benchmark statistics.
+
+    Parameters
+    ----------
+    case_name : str
+        Human-readable case identifier.
+    model : str
+        Registry key for the model under test.
+    concurrency : int
+        Number of in-flight requests allowed for the case.
+    prompt_length : int
+        Prompt size in tokens for the synthetic prompt.
+    output_length : int
+        Requested output length in tokens.
+    streaming : bool
+        Whether the case uses streaming generation.
+    results : list[RequestResult]
+        Raw results collected for the case.
+    wall_time_sec : float
+        End-to-end elapsed wall clock time for the case.
+
+    Returns
+    -------
+    CaseStats
+        Aggregated latency, throughput, and cost statistics.
+    """
     successful = [r for r in results if r.success]
     failed = len(results) - len(successful)
 

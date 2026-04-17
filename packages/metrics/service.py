@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from packages.schemas.responses import LatencyStats, UsageStats
 
@@ -23,9 +22,9 @@ class RequestRecord:
     model: str
     requested_output_tokens: int
     status: str              # "success" | "error"
-    usage: Optional[UsageStats] = None
-    latency: Optional[LatencyStats] = None
-    error_message: Optional[str] = None
+    usage: UsageStats | None = None
+    latency: LatencyStats | None = None
+    error_message: str | None = None
 
 
 class MetricsService:

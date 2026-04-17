@@ -1,8 +1,8 @@
 """Unit tests for packages/benchmarks/aggregator.py."""
 
 import pytest
-from packages.benchmarks.aggregator import _percentile, aggregate, RequestResult
 
+from packages.benchmarks.aggregator import RequestResult, _percentile, aggregate
 
 # ── _percentile ────────────────────────────────────────────────────────────────
 

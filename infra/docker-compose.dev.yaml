@@ -1,7 +1,7 @@
-# Development overrides — extends docker-compose.yml with hot-reload for API and dashboard.
+# Development overrides — extends docker-compose.yaml with hot-reload for API and dashboard.
 #
 # Use via Makefile:   make dev-up / make dev-down / make dev-build
-# Or directly:        docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up -d
+# Or directly:        docker compose -f infra/docker-compose.yaml -f infra/docker-compose.dev.yaml up -d
 #
 # What changes vs prod:
 #   api       — uvicorn --reload so Python changes are picked up without restart
@@ -10,7 +10,7 @@
 services:
   api:
     command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
-    # apps/api and packages are already volume-mounted in docker-compose.yml
+    # apps/api and packages are already volume-mounted in docker-compose.yaml
 
   dashboard:
     build:

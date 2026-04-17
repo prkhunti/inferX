@@ -1,15 +1,18 @@
 # Set required env vars before any app imports so pydantic-settings is satisfied.
 import os
+
 os.environ.setdefault("OPENAI_API_KEY", "test-only-not-real")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+from packages.serving.base import BackendResponse, StreamChunk
 
 # ── Silence MetricsService fire-and-forget tasks ──────────────────────────────
 
@@ -24,8 +27,6 @@ def no_metrics(monkeypatch):
     """
     from packages.metrics.service import metrics_service
     monkeypatch.setattr(metrics_service, "record", lambda *_args, **_kwargs: None)
-
-from packages.serving.base import BackendResponse, StreamChunk
 
 
 # ── Mock backend ──────────────────────────────────────────────────────────────
@@ -99,8 +100,8 @@ async def db_setup():
 @pytest_asyncio.fixture
 async def client(db_setup):
     """Async httpx client wired to the FastAPI app with a mock backend."""
-    from apps.api.main import app
     from apps.api.dependencies import get_backend
+    from apps.api.main import app
     from apps.api.store import benchmark_store
 
     backend = make_mock_backend()
@@ -121,8 +122,8 @@ async def client_with_backend(db_setup):
     """
     Like `client` but yields (client, backend) so tests can inspect mock calls.
     """
-    from apps.api.main import app
     from apps.api.dependencies import get_backend
+    from apps.api.main import app
     from apps.api.store import benchmark_store
 
     backend = make_mock_backend()

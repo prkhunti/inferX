@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from apps.api.database import get_db
-from apps.api.db_models import Request, RequestMetric
+from apps.api.db_models import Request
 
 logger = logging.getLogger(__name__)
 
@@ -16,25 +17,25 @@ router = APIRouter()
 
 
 class RequestMetricResponse(BaseModel):
-    queue_ms: Optional[float]
-    ttft_ms: Optional[float]
-    total_latency_ms: Optional[float]
-    prompt_tokens: Optional[int]
-    output_tokens: Optional[int]
-    tokens_per_sec: Optional[float]
+    queue_ms: float | None
+    ttft_ms: float | None
+    total_latency_ms: float | None
+    prompt_tokens: int | None
+    output_tokens: int | None
+    tokens_per_sec: float | None
     success: bool
-    error_message: Optional[str]
+    error_message: str | None
 
 
 class RequestResponse(BaseModel):
     id: str
     request_type: str
     model: str
-    prompt_token_count: Optional[int]
+    prompt_token_count: int | None
     requested_output_tokens: int
     status: str
     created_at: str
-    metric: Optional[RequestMetricResponse]
+    metric: RequestMetricResponse | None
 
 
 def _serialize(req: Request) -> RequestResponse:
@@ -72,10 +73,7 @@ async def get_request(
     request_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> RequestResponse:
-    """
-    Return the full trace for a single request: metadata, timing, and token counts.
-    Useful for debugging individual requests and understanding the request lifecycle.
-    """
+    """Return the full trace for a single request."""
     result = await db.execute(
         select(Request)
         .options(selectinload(Request.metric))
@@ -93,15 +91,12 @@ async def get_request(
     summary="List recent requests with metrics",
 )
 async def list_requests(
-    model: Optional[str] = None,
-    request_type: Optional[str] = None,
+    model: str | None = None,
+    request_type: str | None = None,
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
 ) -> list[RequestResponse]:
-    """
-    Return the most recent requests, optionally filtered by model or type.
-    Results are ordered newest-first.
-    """
+    """Return recent requests, optionally filtered by model or type."""
     query = (
         select(Request)
         .options(selectinload(Request.metric))

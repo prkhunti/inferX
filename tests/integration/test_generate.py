@@ -1,7 +1,7 @@
 """Integration tests for POST /generate."""
 
-import pytest
 from unittest.mock import AsyncMock
+
 from openai import RateLimitError
 
 
@@ -77,7 +77,12 @@ async def test_generate_backend_api_error_returns_502_with_clean_message(client_
         side_effect=RateLimitError(
             message="You exceeded your current quota",
             response=_make_mock_response(429),
-            body={"error": {"message": "You exceeded your current quota", "code": "insufficient_quota"}},
+            body={
+                "error": {
+                    "message": "You exceeded your current quota",
+                    "code": "insufficient_quota",
+                }
+            },
         )
     )
 
@@ -114,7 +119,9 @@ async def test_generate_generic_error_returns_502(client_with_backend):
 def _make_mock_response(status_code: int):
     """Minimal httpx.Response mock for constructing OpenAI errors in tests."""
     from unittest.mock import MagicMock
+
     import httpx
+
     resp = MagicMock(spec=httpx.Response)
     resp.status_code = status_code
     resp.headers = httpx.Headers({})

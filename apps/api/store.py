@@ -6,8 +6,6 @@ Holds BenchmarkRun objects keyed by run ID. Thread-safe for asyncio
 
 from __future__ import annotations
 
-from typing import Optional
-
 from packages.benchmarks.runner import BenchmarkRun
 
 
@@ -18,7 +16,7 @@ class BenchmarkStore:
     def save(self, run: BenchmarkRun) -> None:
         self._runs[run.id] = run
 
-    def get(self, run_id: str) -> Optional[BenchmarkRun]:
+    def get(self, run_id: str) -> BenchmarkRun | None:
         return self._runs.get(run_id)
 
     def list_all(self) -> list[BenchmarkRun]:

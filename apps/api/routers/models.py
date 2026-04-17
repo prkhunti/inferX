@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
@@ -21,7 +22,7 @@ class ModelProfileResponse(BaseModel):
     backend_type: str
     max_context_tokens: int
     max_output_tokens: int
-    quantization: Optional[str]
+    quantization: str | None
     cost_per_1k_input_tokens: float
     cost_per_1k_output_tokens: float
     cost_per_1k_output_effective: float  # blended: includes typical input cost

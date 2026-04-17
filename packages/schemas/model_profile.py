@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,7 +27,7 @@ class ModelProfile(BaseModel):
     backend_type: str = Field(default="openai", description="Backend adapter to use")
     max_context_tokens: int = Field(default=8192)
     max_output_tokens: int = Field(default=4096)
-    quantization: Optional[str] = Field(default=None, description="e.g. int8, fp16, null")
+    quantization: str | None = Field(default=None, description="e.g. int8, fp16, null")
     cost_per_1k_input_tokens: float = Field(default=0.0, description="USD per 1 000 input tokens")
     cost_per_1k_output_tokens: float = Field(default=0.0, description="USD per 1 000 output tokens")
     tags: list[str] = Field(default_factory=list)
@@ -74,7 +73,7 @@ class ModelRegistry:
 
         logger.info("model_registry.ready count=%d", len(self._profiles))
 
-    def get(self, name: str) -> Optional[ModelProfile]:
+    def get(self, name: str) -> ModelProfile | None:
         return self._profiles.get(name)
 
     def all(self) -> list[ModelProfile]:

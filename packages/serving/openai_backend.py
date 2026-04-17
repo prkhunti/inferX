@@ -1,8 +1,10 @@
-from typing import AsyncIterator
+from __future__ import annotations
+
+from collections.abc import AsyncIterator
 
 from openai import AsyncOpenAI
 
-from .base import BaseBackend, BackendResponse, StreamChunk
+from .base import BackendResponse, BaseBackend, StreamChunk
 
 
 class OpenAIBackend(BaseBackend):
@@ -28,11 +30,13 @@ class OpenAIBackend(BaseBackend):
 
         choice = response.choices[0]
         usage = response.usage
+        prompt_tokens = usage.prompt_tokens if usage is not None else 0
+        completion_tokens = usage.completion_tokens if usage is not None else 0
 
         return BackendResponse(
             text=choice.message.content or "",
-            prompt_tokens=usage.prompt_tokens,
-            completion_tokens=usage.completion_tokens,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
         )
 
     async def stream(
