@@ -10,6 +10,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - BACKEND_TYPE=${BACKEND_TYPE:-echo}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-not-set}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - DEBUG=${DEBUG:-false}
     depends_on:
       postgres:
         condition: service_healthy

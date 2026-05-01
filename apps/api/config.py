@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +24,13 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    @field_validator("openai_base_url", mode="before")
+    @classmethod
+    def empty_base_url_is_unset(cls, value: str | None) -> str | None:
+        if value == "":
+            return None
+        return value
 
 
 def get_settings() -> Settings:
